@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'Firebase/firebase_options.dart';
 
-void main() async {
+Future<void> main() async {
   // Garante que o Flutter esteja totalmente inicializado antes de prosseguir com a conexão ao Firebase.
   // Isso é importante porque o Firebase depende de alguns recursos do Flutter que podem não estar disponíveis
   // imediatamente quando o aplicativo é iniciado. Ao chamar ensureInitialized(), você está garantindo que
