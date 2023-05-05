@@ -1,14 +1,8 @@
-# firebase_connection
+# Conexão com o Firebase
 
-Abrir o cmd como adm e rodar os comandos que o firebase manda
+**__AVISO:__** Executar todos os comandos no cmd como adiministrador.
 
-flutterfire configure --project=authentication-test-72ab6
-
-
-Learn more about using this file and next steps from the d
-
-
-https://www.youtube.com/watch?v=U45mIlvbi6s
+Para mais informações acesse esse [tutorial](https://www.youtube.com/watch?v=U45mIlvbi6s).
 
 # Começando o projeto
 
