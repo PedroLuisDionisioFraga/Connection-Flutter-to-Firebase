@@ -1,0 +1,6 @@
+web/*.html linguist-vendored
+ios/Runner/*.swift linguist-vendored
+ios/Runner/*.h linguist-vendored
+ios/RunnerTests/*.swift linguist-vendored
+android/app/src/main/kotlin/com/example/firebase_authentication/*.kt linguist-vendored
+* text=auto eol=lf
