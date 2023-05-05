@@ -10,7 +10,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Inicia o Firebase em um aplicativo Flutter
   await Firebase.initializeApp(
-    name: "Authentication Test",
+    name: "Core Test",
     options: DefaultFirebaseOptions.currentPlatform,
   ).then((value) {
     print("Connection Success");
