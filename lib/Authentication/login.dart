@@ -1,7 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_authentication/Authentication/second_step_authentication.dart';
 import 'package:firebase_authentication/Firebase/firebase_helper.dart';
 import 'package:firebase_authentication/Shared/regex.dart';
 import 'package:flutter/material.dart';
-import '../main.dart';
 import 'recover_credencials.dart';
 
 class LoginPage extends StatefulWidget {
@@ -20,6 +21,10 @@ class _LoginPageState extends State<LoginPage> {
 
   bool showPassword = true;
 
+  Future<User?> login() async {
+    return await FirebaseHelper.login(email: email.text, password: password.text);
+  }
+
   void changingVisibilityOfPassword() {
     setState(() {
       showPassword = !showPassword;
@@ -37,6 +42,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final double maxScreenWidth = MediaQuery.of(context).size.width;
+    print(FirebaseHelper.getAllUserInfo());
     return Scaffold(
       body: GestureDetector(
         onTap: () {
@@ -153,16 +159,17 @@ class _LoginPageState extends State<LoginPage> {
                             if (formKey.currentState!.validate()) {
                               formKey.currentState!.save();
                               print("Email ${email.text} e senha ${password.text}");
-                              bool canLogger = await FirebaseHelper.login(email: email.text, password: password.text);
+                              login().then((value) {
+                                if (value != null) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) {
+                                      return const SecondStepAuthentication();
+                                    }),
+                                  );
+                                }
+                              });
                               // Aqui você pode fazer a lógica de autenticação e navegar para outra tela
-                              if (canLogger) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) {
-                                    return const MyHomePage();
-                                  }),
-                                );
-                              }
                             }
                           },
                           child: const Text("Login"),
