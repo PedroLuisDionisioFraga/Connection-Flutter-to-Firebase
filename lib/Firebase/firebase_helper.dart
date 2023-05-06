@@ -7,6 +7,7 @@ class FirebaseHelper {
   static late final FirebaseApp _app;
   static late final FirebaseAuth _auth;
   static const String url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDpgYG5jDUvE6Xv88OVt_92z03MEfDEanU";
+  static late String _verificationId;
 
   static Future<void> firebaseConnection() async {
     /*FirebaseOptions _options = FirebaseOptions(
@@ -34,12 +35,14 @@ class FirebaseHelper {
       );
       // TODO: NÃO FUNCIONA ADICIONAR DISPLAYNAME
       if (userCredential.user != null) {
-        print("nome: ${name}");
         await userCredential.user!.updateDisplayName(name);
-        print(userCredential.user!.displayName);
         await userCredential.user!.sendEmailVerification();
       }
-
+      //print(phone);
+      /*
+      if (phone != null) {
+        verifyPhoneNumber(phoneNumber: phone);
+      }*/
       // usuário criado com sucesso
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -52,16 +55,16 @@ class FirebaseHelper {
     }
   }
 
-  static Future<bool> login({required String email, required String password}) async {
+  static Future<User?> login({required String email, required String password}) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
       if (userCredential.user!.emailVerified) {
-        return true;
+        return userCredential.user!;
       }
-      return false;
+      return null;
       /*  Guarda o login localmente
       if (user != null) {
         uid = user.uid;
@@ -77,7 +80,7 @@ class FirebaseHelper {
         print('Wrong password provided.');
       }
     }
-    return false;
+    return null;
   }
 
   static Future<void> signOut() async {
@@ -89,11 +92,23 @@ class FirebaseHelper {
   }
 
   static Future<void> resetPassword({required String email}) async {
-    await _auth.sendPasswordResetEmail(email: email);
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      print("Log Out error: ${e.code}");
+    }
   }
 
   static Future<void> deleteAccount({required String email}) async {
-    _auth.currentUser == null ? print("You are not logged") : await _auth.currentUser!.delete();
+    if (_auth.currentUser == null) {
+      print("You are not logged");
+      return;
+    }
+    try {
+      await _auth.currentUser!.delete();
+    } on FirebaseAuthException catch (e) {
+      print("Log Out error: ${e.code}");
+    }
   }
 /*
   static Future<void> updateEmail({required String newEmail}) async {
@@ -107,9 +122,9 @@ class FirebaseHelper {
   }*/
 
   static Future<void> updatePasswordViaEmail({required String email}) async {
-    await _auth.sendPasswordResetEmail(email: email).then((value) {
-      print("value: enviado");
-    });
+    // await _auth.sendPasswordResetEmail(email: email).then((value) {
+    //   print("value: enviado");
+    // });
 
     try {
       await _auth.sendPasswordResetEmail(email: email);
@@ -117,6 +132,61 @@ class FirebaseHelper {
       print("FirebaseAuthException: ${e.code}, e a mensagem é ${e.message}");
     } catch (e) {
       print("Error: $e");
+    }
+  }
+
+  static Future<void> getAllUserInfo() async {
+    User? actualUser = _auth.currentUser;
+    if (actualUser != null) {
+      print(
+        """
+        Nome: ${actualUser.displayName}
+        Email: ${actualUser.email}
+        Verificou Email?: ${actualUser.emailVerified}
+        É anônimo: ${actualUser.isAnonymous}
+        Telefone: ${actualUser.phoneNumber}
+        URL da Foto de Perfil: ${actualUser.photoURL}
+        User ID: ${actualUser.uid}
+        Provider Data: ${actualUser.providerData}
+        ID Token: ${actualUser.getIdToken()}
+        """,
+      );
+    }
+  }
+
+  static Future<void> verifyPhoneNumber({required String phoneNumber}) async {
+    if (_auth.currentUser == null) {
+      return;
+    }
+    await _auth.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      verificationCompleted: (PhoneAuthCredential phoneCredential) async {},
+      verificationFailed: (FirebaseAuthException e) {
+        print("Failed to verify phone number: ${e.message}");
+      },
+      codeSent: (String verificationId, int? resendToken) async {
+        // Save the verification id somewhere so that you can use it later
+        // to build the credential for phone number authentication.
+        _verificationId = verificationId;
+        print("Verification code sent to $phoneNumber and verificatinId is $verificationId");
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {
+        print("Auto retrieval timeout");
+      },
+      timeout: const Duration(seconds: 60),
+    );
+  }
+
+  static Future<void> updatePhone({required String smsCode}) async {
+    try {
+      PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        verificationId: _verificationId,
+        smsCode: smsCode,
+      );
+      await _auth.currentUser!.updatePhoneNumber(credential);
+      print("Phone updated");
+    } on FirebaseAuthException catch (e) {
+      print(e);
     }
   }
 }
