@@ -1,5 +1,6 @@
 import 'package:firebase_authentication/Firebase/firebase_helper.dart';
 import 'package:firebase_authentication/Shared/regex.dart';
+import 'package:firebase_authentication/main.dart';
 import 'package:flutter/material.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -18,9 +19,10 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
   final TextEditingController confirmPassword = TextEditingController();
+  final TextEditingController phone = TextEditingController();
 
-  bool showPassword = true;
-  bool showConfirmPassword = true;
+  bool showPassword = false; // Trocar para 'true'
+  bool showConfirmPassword = false; // Trocar para 'true'
 
   final FocusNode field1Focus = FocusNode();
   final FocusNode field2Focus = FocusNode();
@@ -43,6 +45,7 @@ class _SignUpPageState extends State<SignUpPage> {
     password.dispose();
     confirmPassword.dispose();
     email.dispose();
+    phone.dispose();
     formKey.currentState == null ? null : formKey.currentState!.dispose();
     super.dispose();
   }
@@ -94,7 +97,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           icon: Icon(
                             Icons.email,
                           ),
-                          labelText: "Usuário",
+                          labelText: "Usuário*",
                           //helperText: "",
                         ),
                       ),
@@ -124,7 +127,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           icon: Icon(
                             Icons.email,
                           ),
-                          labelText: "E-mail",
+                          labelText: "E-mail*",
                           hintText: "seuemail@gmail.com",
                           //helperText: "",
                         ),
@@ -162,7 +165,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           icon: const Icon(
                             Icons.lock,
                           ),
-                          labelText: "Senha",
+                          labelText: "Senha*",
                           //helperText: "",
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -208,7 +211,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           icon: const Icon(
                             Icons.lock,
                           ),
-                          labelText: "Confirmar Senha",
+                          labelText: "Confirmar Senha*",
                           suffixIcon: IconButton(
                             icon: Icon(
                               showConfirmPassword ? Icons.visibility : Icons.visibility_off,
@@ -220,6 +223,22 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                       ),
                     ),
+                    //! Telefone
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                      child: TextFormField(
+                        textAlignVertical: TextAlignVertical.center,
+                        controller: phone,
+                        maxLines: 1,
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(icon: Icon(Icons.phone), labelText: "Telefone", hintText: "(DDD) x-xxxx-xxxx"),
+                      ),
+                    ),
+                    //! Botão
                     Align(
                       alignment: Alignment.centerRight,
                       child: Padding(
@@ -229,7 +248,13 @@ class _SignUpPageState extends State<SignUpPage> {
                             if (password.text == confirmPassword.text) {
                               if (formKey.currentState!.validate()) {
                                 formKey.currentState!.save();
-                                FirebaseHelper.signUp(name: username.text, email: email.text, password: password.text);
+                                FirebaseHelper.signUp(name: username.text, email: email.text, password: password.text, phone: phone.text);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) {
+                                    return const MyHomePage();
+                                  }),
+                                );
                               }
                             } else {
                               // Fazer um aviso aqui
